@@ -21,23 +21,43 @@ pool.connect().then(() => {
   console.log(e);
 })
 
-const arg = process.argv.slice(2);
-console.log(arg);
+// const arg = process.argv.slice(2);
+// console.log(arg);
 
 
-pool.query(`
+// pool.query(`
+// SELECT teachers.name as teacher, cohorts.name as cohort
+// FROM teachers 
+// JOIN assistance_requests ON teacher_id = teachers.id
+// JOIN students ON students.id = assistance_requests.student_id
+// JOIN cohorts ON cohorts.id = students.cohort_id
+// WHERE cohorts.name = '${arg[0]}'
+// GROUP BY teacher, cohort
+// ORDER BY teachers.name;
+// `)
+// .then(res => {
+//   res.rows.forEach(teacherCohort =>{
+//    console.log(`${teacherCohort.cohort}: ${teacherCohort.teacher}`);
+//   }); 
+// })
+// .catch(err => console.error('query error', err.stack));
+
+const queryString =`
 SELECT teachers.name as teacher, cohorts.name as cohort
 FROM teachers 
 JOIN assistance_requests ON teacher_id = teachers.id
 JOIN students ON students.id = assistance_requests.student_id
 JOIN cohorts ON cohorts.id = students.cohort_id
-WHERE cohorts.name = '${arg[0]}'
+WHERE cohorts.name = $1
 GROUP BY teacher, cohort
 ORDER BY teachers.name;
-`)
-.then(res => {
+`;
+
+const cohortName = process.argv[2];
+const values = [cohortName];
+
+pool.query(queryString,values).then(res => {
   res.rows.forEach(teacherCohort =>{
    console.log(`${teacherCohort.cohort}: ${teacherCohort.teacher}`);
   }); 
-})
-.catch(err => console.error('query error', err.stack));
+}).catch(err => console.error('query error', err.stack));
